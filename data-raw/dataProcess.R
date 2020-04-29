@@ -90,6 +90,11 @@ names(chars) = chars %>% map_chr(function(x){
 # create the table. it initially creates the table because that's what my original pipeline did... later I will convert the
 # relevant bits into a list, making this a little silly.
 charTable = chars %>% map(function(x){
+	if(class(x$classInfo) == 'matrix' && nrow(x$classInfo) == 0){
+		x$classInfo = NULL
+	}
+
+	hede <<- x
 	data.frame(ip = x$ip,
 			   finger = x$finger,
 			   hash = x$hash,
@@ -206,6 +211,7 @@ races = c(Aarakocra = 'Aarakocra',
 		  Eladrin = 'Eladrin')
 
 align = list(NG = c('ng',
+					'neatral good',
 					'"good"',
 					'good',
 					'neuteral good',
@@ -275,6 +281,7 @@ align = list(NG = c('ng',
 			 	   'caótico neutral',
 			 	   "тру хаотик"),
 			 LN = c('lawful neutral',
+			 	   'lawful nuetral',
 			 	   'lawfull neutral',
 			 	   'legal neutral',
 			 	   'lawful neitral',
@@ -290,6 +297,7 @@ align = list(NG = c('ng',
 			 	   'neutral maligno'),
 			 LE = c('lawful evil',
 			 	   'lawfuo evil',
+			 	   'lawful/evil',
 			 	   'lawful evik',
 			 	   'le',
 			 	   'legal malvado',
