@@ -14,7 +14,7 @@ dnddata
             -   [Possible issues with detection of unique characters](#possible-issues-with-detection-of-unique-characters)
             -   [Possible issues with selection bias](#possible-issues-with-selection-bias)
 
-This is a weekly updated dataset of character that are submitted to my web applications [printSheetApp](https://oganm.com/shiny/printSheetApp) and [interactiveSheet](https://oganm.com/shiny/interactiveSheet). It is a superset of the dataset I previously released under [oganm/dndstats](https://oganm.github.io/dndstats) with a much larger sample (6920 characters) size and more data fields. It was inspired by the [FiveThirtyEight](https://fivethirtyeight.com/features/is-your-dd-character-rare/) article on race/class proportions and the data seems to correlate well with those results (see my [dndstats article](https://oganm.github.io/dndstats)).
+This is a weekly updated dataset of character that are submitted to my web applications [printSheetApp](https://oganm.com/shiny/printSheetApp) and [interactiveSheet](https://oganm.com/shiny/interactiveSheet). It is a superset of the dataset I previously released under [oganm/dndstats](https://oganm.github.io/dndstats) with a much larger sample (6949 characters) size and more data fields. It was inspired by the [FiveThirtyEight](https://fivethirtyeight.com/features/is-your-dd-character-rare/) article on race/class proportions and the data seems to correlate well with those results (see my [dndstats article](https://oganm.github.io/dndstats)).
 
 Along with a simple table (an R `data.frame` in package), the data is also present in json format (an R `list` in package). In the table version some data fields encode complex information that are represented in a more readable manner in the json format. The data included is otherwise identical.
 
@@ -55,14 +55,14 @@ library(reshape2)
 # find all available races
 races = dnd_chars_unique_list %>% 
     purrr::map('race') %>% 
-    purrr::map_chr('processedRace') %>%
+    purrr::map_chr('processedRace') %>% trimws() %>% 
     unique %>% {.[.!='']}
 
 # find all available classes
 classes = dnd_chars_unique_list %>% 
     purrr::map('class') %>%
     unlist(recursive = FALSE) %>%
-    purrr::map_chr('class') %>% unique
+    purrr::map_chr('class') %>% trimws() %>%  unique
 
 # create an empty matrix
 coOccurenceMatrix = matrix(0 , nrow=length(races),ncol = length(classes))
@@ -79,8 +79,8 @@ for(i in seq_along(races)){
         # get the characters with the right class. Weight multiclassed characters based on level
         raceSubset %>% purrr::map('class') %>% 
             purrr::map_dbl(function(x){
-                x %>% sapply(function(y){
-                    (y$class == classes[j])*y$level/(sum(map_int(x,'level')))
+                x  %>% sapply(function(y){
+                    (trimws(y$class) == classes[j])*y$level/(sum(map_int(x,'level')))
                 }) %>% sum}) %>% sum -> coOcc
         
         coOccurenceMatrix[i,j] = coOcc
