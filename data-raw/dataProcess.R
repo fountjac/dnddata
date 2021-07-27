@@ -14,7 +14,8 @@ library(here)
 library(data.table)
 library(randomIDs) # add friendlier names. github.com/oganm/randomIDs
 library(jsonlite)
-usethis::use_data_raw()
+library(ipapi)
+#usethis::use_data_raw()
 
 set_file_wd = function(){
 	command = commandArgs(trailingOnly = FALSE)
@@ -55,6 +56,8 @@ fileInfo = file.info(charFiles)
 charFiles = charFiles[order(fileInfo$mtime)]
 fileInfo = fileInfo[order(fileInfo$mtime),]
 
+charFiles = charFiles[fileInfo$size!=0]
+fileInfo = fileInfo[fileInfo$size!=0,]
 # use import5eChar to read the all of them
 chars = charFiles %>% lapply(function(x){
 	memoImportChar(file = x)
@@ -90,11 +93,12 @@ names(chars) = chars %>% map_chr(function(x){
 # create the table. it initially creates the table because that's what my original pipeline did... later I will convert the
 # relevant bits into a list, making this a little silly.
 charTable = chars %>% map(function(x){
-	if(class(x$classInfo) == 'matrix' && nrow(x$classInfo) == 0){
+	hede <<- x
+	if((class(x$classInfo) == 'matrix' && nrow(x$classInfo) == 0) ||
+	   (class(x$classInfo) == 'matrix' && nrow(x$classInfo) == 1 && x$classInfo[,'Level']=='0')){
 		x$classInfo = NULL
 	}
 
-	hede <<- x
 	data.frame(ip = x$ip,
 			   finger = x$finger,
 			   hash = x$hash,
@@ -173,23 +177,23 @@ charTable$countryCode = ipLocations$countryCode
 # it'll only say human
 # here, I define regex that matches races.
 # kind of an overkill as only few races actually required special care
-races = c(Aarakocra = 'Aarakocra',
+races = c(Aarakocra = '(Aarakocra)|(Birdfolk)',
 		  Aasimar = 'Aasimar',
 		  Bugbear= 'Bugbear',
 		  Dragonborn = 'Dragonborn',
-		  Dwarf = 'Dwarf',
+		  Dwarf = 'Dwarf|Warding',
 		  Elf = '(?<!Half-)Elf|Drow',
 		  Firbolg = 'Firbolg',
 		  Genasi= 'Genasi',
 		  Gith = 'Geth|Githzerai',
-		  Gnome = 'Gnome',
+		  Gnome = '(Gnome)|(Scribing)',
 		  Goblin='^Goblin$',
 		  Goliath = 'Goliath',
-		  'Half-Elf' = '(^Half-Elf$)|(^Variant$)',
+		  'Half-Elf' = '(^Half-Elf$)|(^Variant$)|(Detection)|(Storm)|(Half-Elf .Wood.)|(Variant Half-Elf)|(Half-Elf Variant)',
 		  'Half-Orc' = 'Half-Orc',
-		  Halfling = 'Halfling',
+		  Halfling = '(Halfling)|(Hospitality)|(Healing)',
 		  Hobgoblin = 'Hobgoblin$',
-		  Human = 'Human|Variant Human',
+		  Human = '(Human)|(Variant Human)|(Sentinel)|(Making)|(Passage)',
 		  Kenku = 'Kenku',
 		  Kobold = 'Kobold',
 		  Lizardfolk = 'Lizardfolk',
@@ -206,11 +210,14 @@ races = c(Aarakocra = 'Aarakocra',
 		  `Simic hybrid` = 'Animal Hybrid|Simic Hybrid',
 		  Warforged = 'Warforged|Envoy|Juggernaut|Juggeenaut',
 		  Changeling = 'Changeling',
-		  Shifter = 'Shifter',
+		  Shifter = '(Shifter)|(Hunt)|(Hide)|(Stride)|(Tooth)',
 		  Kalashtar = 'Kalashtar',
-		  Eladrin = 'Eladrin')
+		  Eladrin = 'Eladrin',
+		  Leonin = '(Leonine)|(Leonin)',
+		  Satyr = 'Satyr')
 
 align = list(NG = c('ng',
+					'n,g',
 					'neatral good',
 					'"good"',
 					'good',
@@ -233,6 +240,8 @@ align = list(NG = c('ng',
 					'neutral bueno',
 					'n. good'),
 			 CG = c('chaotic good',
+			 	   'chaotic goo',
+			 	   'chaothic good',
 			 	   'caotica buena',
 			 	   'chaotic good.',
 			 	   'caótico bueno',
@@ -242,6 +251,9 @@ align = list(NG = c('ng',
 			 	   'c/g',
 			 	   'good chaotic'),
 			 LG = c('lawful good',
+			 	   'l.g.',
+			 	   'laewful good',
+			 	   'lawful/good',
 			 	   'l/g',
 			 	   'l-g',
 			 	   'lg',
@@ -252,6 +264,11 @@ align = list(NG = c('ng',
 			 	   'legal good',
 			 	   'lb'),
 			 NN = c('neutral',
+			 	   'nn',
+			 	   'loyal neutral',
+			 	   'neutal',
+			 	   'true n',
+			 	   "neutral-neutral",
 			 	   'neutral neutral',
 			 	   'netral',
 			 	   'n',
@@ -264,6 +281,8 @@ align = list(NG = c('ng',
 			 	   'neutro',
 			 	   'true nuetral'),
 			 CN = c('chaotic neutral',
+			 	   "c n",
+			 	   'chaotique neutre',
 			 	   'neutral caotico',
 			 	   'caotic neutral',
 			 	   'chaotic-neutral',
@@ -281,6 +300,7 @@ align = list(NG = c('ng',
 			 	   'caótico neutral',
 			 	   "тру хаотик"),
 			 LN = c('lawful neutral',
+			 	   'l.n',
 			 	   'lawful nuetral',
 			 	   'lawfull neutral',
 			 	   'legal neutral',
