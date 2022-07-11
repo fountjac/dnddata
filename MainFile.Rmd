@@ -1,0 +1,40 @@
+---
+title: "MainFile"
+author: "Jackie Fountain"
+date: "7/11/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r load libraries}
+library(tidyverse)
+library(dplyr)
+library(purrr)
+```
+
+```{r}
+allchars <-read_tsv(here::here("data-raw","dnd_chars_all.tsv"))
+```
+
+```{r subset fighters}
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
