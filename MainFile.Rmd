@@ -19,10 +19,40 @@ library(purrr)
 allchars <-read_tsv(here::here("data-raw","dnd_chars_all.tsv"))
 ```
 
-```{r subset fighters}
-
+```{r Distribution of Adventurer Levels}
+allchars %>%
+    #Ready Data
+  count(levelGroup) %>%
+  mutate(levelG=fct_relevel(levelGroup,"1-3","4-7","8-11","12-15",
+  	"16-18","19-20"))%>%
+	#Build Bar Chart
+  ggplot(aes(x=levelG,y=n,color=levelG))+geom_bar(stat="identity")+
+    geom_text(aes(label=n), vjust=-.3, color="black", size=3.5)+
+    theme(legend.position="none")+
+	labs(title="Distribution of Adventurers by Level Range",
+	x="Level Range",y="Count")
 ```
 
+```{r Average of Stats}
+allchars %>%
+	#Manipulate Data
+ summarise(STR=mean(Str),DEX=mean(Dex),
+		   CON=mean(Con),INT=mean(Int),
+		   WIS=mean(Wis),CHA=mean(Cha)) %>%
+	#Pivot Table
+ pivot_longer(
+    cols = `STR`:`CHA`,
+    names_to = "Stat",
+    values_to = "AverageValue")%>%
+	#Build Chart
+	ggplot(aes(x=Stat,y=AverageValue,color=Stat))+
+	geom_bar(stat="identity")+
+    geom_text(aes(label=round(AverageValue,digits=2)), 
+      vjust=1.6, color="white", size=3.5)+
+      theme(legend.position="none")+
+	  labs(title="Average of Each Character Stat", 
+	  x="Ability Score",y="Average Value")
+```
 
 
 
