@@ -39,22 +39,31 @@ allchars %>%
  summarise(STR=mean(Str),DEX=mean(Dex),
 		   CON=mean(Con),INT=mean(Int),
 		   WIS=mean(Wis),CHA=mean(Cha)) %>%
-	#Pivot Table
+	#Pivot Table and Ordering Abilities
  pivot_longer(
     cols = `STR`:`CHA`,
     names_to = "Stat",
     values_to = "AverageValue")%>%
-	#Build Chart
-	ggplot(aes(x=Stat,y=AverageValue,color=Stat))+
-	geom_bar(stat="identity")+
+	mutate(Ability=fct_relevel(Stat,"STR","DEX","CON","INT","WIS","CHA"))%>%
+	#Building Bar Chart
+	ggplot(aes(x=Ability,y=AverageValue,color=Ability))+
+	geom_bar(stat="identity")+ 
     geom_text(aes(label=round(AverageValue,digits=2)), 
       vjust=1.6, color="white", size=3.5)+
       theme(legend.position="none")+
-	  labs(title="Average of Each Character Stat", 
+	  labs(title="Average of Each Ability Score", 
 	  x="Ability Score",y="Average Value")
 ```
 
 
+```{r Races}
+#Two barcharts one with races and one with subraces? Just from phb look at expanding or making an other catagory
+allchars %>%
+	count(race)%>%
+	subset(n >100)%>%
+		ggplot(aes(x=race,y=n,color=race))
+	
+```
 
 
 
