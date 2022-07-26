@@ -34,6 +34,7 @@ allchars %>%
 ```
 
 ```{r Average of Stats}
+#Add distributions as well
 allchars %>%
 	#Manipulate Data
  summarise(STR=mean(Str),DEX=mean(Dex),
@@ -54,14 +55,35 @@ allchars %>%
 	  labs(title="Average of Each Ability Score", 
 	  x="Ability Score",y="Average Value")
 ```
+```{r Five Number Summaries of Stats}
+allchars %>%
+	summarise(Variable=c("Min","Q1","Median","Mean","Q3","Max")
+			  ,STR=summary(Str),DEX=summary(Dex),
+		   CON=summary(Con),INT=summary(Int),
+		   WIS=summary(Wis),CHA=summary(Cha))
 
+```
+
+
+#see how differs from buying everthing equally in point buy
 
 ```{r Races}
 #Two barcharts one with races and one with subraces? Just from phb look at expanding or making an other catagory
+
 allchars %>%
 	count(race)%>%
-	subset(n >100)%>%
-		ggplot(aes(x=race,y=n,color=race))
+    arrange(desc(n)) %>%
+    slice(1:10) %>%
+#Building Bar Chart
+	ggplot(aes(x=race,y=n,color=race))+ geom_bar(stat="identity")
+
+allchars %>%
+	count(processedRace)%>%
+arrange(desc(n)) %>%
+    slice(1:10) %>%
+#Building Bar Chart
+	ggplot(aes(x=processedRace,y=n,color=processedRace))+ geom_bar(stat="identity")
+
 	
 ```
 
