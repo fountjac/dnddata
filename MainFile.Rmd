@@ -11,12 +11,22 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r load libraries}
 library(tidyverse)
-library(dplyr)
-library(purrr)
 ```
 
 ```{r}
 allchars <-read_tsv(here::here("data-raw","dnd_chars_all.tsv"))
+```
+
+
+```{r Single Levels Barchart}
+allchars %>%
+	subset(level<21) %>%
+		#Building Bar Chart
+	ggplot(aes(x=level))+
+	geom_bar()+
+	labs(title="Distribution of Adventurers by Level",
+	x="Level",y="Frequency")
+
 ```
 
 ```{r Distribution of Adventurer Levels}
@@ -33,10 +43,11 @@ allchars %>%
 	x="Level Range",y="Count")
 ```
 
-```{r Average of Stats}
+```{r Average of Stats of Starting Characters}
 #Add distributions as well
 allchars %>%
-	#Manipulate Data
+	subset(level<2)%>%
+	#Manipulate Data: Calculating Means
  summarise(STR=mean(Str),DEX=mean(Dex),
 		   CON=mean(Con),INT=mean(Int),
 		   WIS=mean(Wis),CHA=mean(Cha)) %>%
@@ -56,24 +67,33 @@ allchars %>%
 	  x="Ability Score",y="Average Value")
 ```
 ```{r Five Number Summaries of Stats}
-allchars %>%
+numSums <-allchars %>%
+	subset(level<2)%>%
 	summarise(Variable=c("Min","Q1","Median","Mean","Q3","Max")
 			  ,STR=summary(Str),DEX=summary(Dex),
 		   CON=summary(Con),INT=summary(Int),
 		   WIS=summary(Wis),CHA=summary(Cha))
+```
 
+```{r random level 1 character stats}
+set.seed(12345)                          # Set seed for reproducibility
+
+allchars %>%
+	subset(level<2, processedRace != "NA")%>%
+	sample_n(10)%>%
+	select(processedRace, class, Str:Cha)
 ```
 
 
-#see how differs from buying everthing equally in point buy
+
+
 
 ```{r Races}
-#Two barcharts one with races and one with subraces? Just from phb look at expanding or making an other catagory
-
+#Two barcharts one with races and one with subraces included
 allchars %>%
 	count(race)%>%
     arrange(desc(n)) %>%
-    slice(1:10) %>%
+    slice(1:10) %>% #looking at top 10
 #Building Bar Chart
 	ggplot(aes(x=race,y=n,color=race))+ geom_bar(stat="identity")
 
