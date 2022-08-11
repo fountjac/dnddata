@@ -44,7 +44,6 @@ allchars %>%
 ```
 
 ```{r Average of Stats of Starting Characters}
-#Add distributions as well
 allchars %>%
 	subset(level<2)%>%
 	#Manipulate Data: Calculating Means
@@ -68,7 +67,7 @@ allchars %>%
 ```
 ```{r Five Number Summaries of Stats}
 numSums <-allchars %>%
-	subset(level<2)%>%
+	subset(level<2)%>% #for whatever reason =1 wasn't properly subsetting
 	summarise(Variable=c("Min","Q1","Median","Mean","Q3","Max")
 			  ,STR=summary(Str),DEX=summary(Dex),
 		   CON=summary(Con),INT=summary(Int),
